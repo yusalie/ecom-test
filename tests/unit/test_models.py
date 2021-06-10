@@ -1,5 +1,7 @@
 from unittest import TestCase
+from unittest import mock
 from market.models import User, Item
+from unittest.mock import patch, PropertyMock
 
 class TestModels(TestCase):
     def test_user(self):
@@ -16,3 +18,5 @@ class TestModels(TestCase):
         self.assertEqual(item.price, 250, 'price')
         self.assertEqual(item.barcode, '258741369000', 'barcode')
         self.assertEqual(item.description, 'description', 'description')
+    
+    
