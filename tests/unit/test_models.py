@@ -18,5 +18,4 @@ class TestModels(TestCase):
         self.assertEqual(item.price, 250, 'price')
         self.assertEqual(item.barcode, '258741369000', 'barcode')
         self.assertEqual(item.description, 'description', 'description')
-    
-    
+        

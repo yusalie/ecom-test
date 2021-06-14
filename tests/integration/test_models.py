@@ -24,7 +24,7 @@ class somethingModel(BaseTest):
             
             result = db.session.query(User).filter_by(username="something").first()
             self.assertIsNone(result)
-    
+            
     def test_item_crud(self):
         with self.app_context():
             item = Item(name='RTX 3080', price=1200, barcode='8555632047963', description='description')
