@@ -53,33 +53,21 @@ class TestForms(BaseTest):
     def test_market(self):
         with self.app:
             with self.app_context():
-                response = self.app.post('/register', data=dict(username='test4', email_address='test3@test.com', password1='password', password2='password'), follow_redirects=True)
-                # user = db.session.query(User).filter_by(email_address='test4@test.com').first()
-                # self.assertTrue(user)
-                self.assertIn(b'Account created successfully! You are now logged in as test4', response.data)
+                # create user n login
+                response = self.app.post('/register', data=dict(username='test4', email_address='test3@test.com', password1='password', password2='password', budget = 2000), follow_redirects=True)
                 self.assertEqual(current_user.get_id(), '1')
-                
-                response = self.app.post('/login', data=dict(username='test4', email_address='test3@test.com', password='password'), follow_redirects=True)
-                # self.assertTrue(user)
-            
-                response = self.app.get('/logout', follow_redirects=True)
-                self.assertEqual(response.status_code, 200)
-        
-                self.assertIn('/home', request.url)
-                self.assertFalse(current_user.is_active)
-                
+    
+                # create item save to db
                 item = Item(name='RTX 3090', price=1200, barcode='8555632047963', description='description')
-                result = db.session.query(Item).filter_by(name="RTX 3090").first()
-                self.assertIsNone(result)
-                
                 db.session.add(item)
                 db.session.commit()
-                
                 result = db.session.query(Item).filter_by(name="RTX 3090").first()
                 self.assertIsNotNone(result)
                 
-                response = self.app.post('/market', data=dict(name='RTX 3090', price=1200, barcode='8555632047963', description='description'), follow_redirects=True)
-                item = db.session.query(Item).filter_by(name='RTX 3090').first()
-                self.assertTrue(item)
-                self.assertIn(b'Congratulations! You purchased RTX 3090 for 1,200$', response.data)
-                self.assertEqual(response.status_code, 200)
+                # buy item in market
+                response = self.app.post('/market', follow_redirects=True)
+              
+                self.assertIn(b'Are you sure you want to buy RTX 3090 for 1200$ ?', response.data)
+                self.assertIn(b'By clicking Purchase, you will purchase this item.', response.data)
+                self.assertIn(b'Congratulations! You purchased RTX 3090 for 1200$', response.data)
+                
