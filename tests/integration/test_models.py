@@ -36,7 +36,6 @@ class somethingModel(BaseTest):
             
             result = db.session.query(Item).filter_by(name="RTX 3080").first()
             self.assertIsNotNone(result)
-            # assert user in db.session
             
             db.session.delete(item)
             db.session.commit()
