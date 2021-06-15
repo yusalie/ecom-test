@@ -42,3 +42,4 @@ class somethingModel(BaseTest):
             
             result = db.session.query(Item).filter_by(name="RTX 3080").first()
             self.assertIsNone(result)
+    

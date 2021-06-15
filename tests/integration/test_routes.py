@@ -72,7 +72,24 @@ class TestForms(BaseTest):
                 # buy item in market
                 response = self.app.post('/market',data=dict(purchased_item='RTX 3090') ,follow_redirects=True)
               
-                # self.assertIn(b'Are you sure you want to buy RTX 3090 for 1200$ ?', response.data)
-                # self.assertIn(b'By clicking Purchase, you will purchase this item.', response.data)
                 self.assertIn(b'Congratulations! You purchased RTX 3090 for 1200$', response.data)
-                
+    
+    def test_invalid_username(self):
+        with self.app:
+            with self.app_context():
+                # correct details
+                response = self.app.post('/register', data=dict(
+                username='test', email_address='test@gmail.com',
+                password1='python', password2='qwerty'
+            ), follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b"There was an error with creating a user: ", response.data)
+            
+    def test_invalid_login(self):
+        with self.app:
+            with self.app_context():
+                response = self.app.post('/login', data=dict(
+                username='ramlethal', password='123456'
+            ), follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Username and password are not match! Please try again', response.data)

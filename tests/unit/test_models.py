@@ -23,7 +23,6 @@ class TestModels(TestCase):
         passw = User(username='qwerty', email_address='test@gmail.com', password_hash='password', budget=1100).password
         print(passw)
         
-    
     def test_password_setter(self):
         password = 'qwerty'
         pw_hash = bcrypt.generate_password_hash(password)
@@ -31,8 +30,6 @@ class TestModels(TestCase):
     
     
     def test_password_verification(self):
-        # u = User(password='password')
-        # self.assertTrue(u.check_password_correction('password'))
         password = 'qwerty'
         pw_hash = bcrypt.generate_password_hash(password)
         ps_hash = bcrypt.check_password_hash(pw_hash, 'qwerty')
@@ -44,8 +41,6 @@ class TestModels(TestCase):
         ))
         self.assertTrue(user)    
     
-   
-        
     def test_item(self):
         item = Item(name='paper', price=15, barcode='white', description='test')
         
