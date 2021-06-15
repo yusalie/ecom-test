@@ -93,3 +93,21 @@ class TestForms(BaseTest):
             ), follow_redirects=True)
             self.assertEqual(response.status_code, 200)
             self.assertIn(b'Username and password are not match! Please try again', response.data)
+    
+    def test_sell_item(self):
+        with self.app:
+            with self.app_context():
+                response = self.app.post('/register', data=dict(username='test5', email_address='test5@test.com', password1='password', password2='password'), follow_redirects=True)
+                self.assertEqual(current_user.get_id(), '1')
+                
+                # create item save to db
+                item = Item(name='RTX 3090', price=1200, barcode='8555632047963', description='description', owner=1)
+                db.session.add(item)
+                db.session.commit()
+                result = db.session.query(Item).filter_by(name="RTX 3090").first()
+                self.assertTrue(result)
+                
+                # buy item in market
+                response = self.app.get('/market',data=dict(sold_item='RTX 3090') ,follow_redirects=True)
+              
+                self.assertIn(b'Congratulations! You sold RTX 3090 back to market!', response.data)
