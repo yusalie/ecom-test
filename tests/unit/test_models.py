@@ -1,21 +1,60 @@
 from unittest import TestCase
-from unittest import mock
 from market.models import User, Item
-from unittest.mock import patch, PropertyMock
+from market import bcrypt
+
 
 class TestModels(TestCase):
+    # test user model creates user object
     def test_user(self):
-        user = User(username='something', email_address='something@email.com', password_hash='123456')
+        user = User(username='qwerty', email_address='test@gmail.com', password_hash='password', budget=1100)
         
-        self.assertEqual(user.username, 'something', 'username')
-        self.assertEqual(user.email_address, 'something@email.com', 'email')
-        self.assertEqual(user.password_hash, '123456', 'password')
+        self.assertEqual(user.username, 'qwerty', "this the username")
+        self.assertEqual(user.email_address, 'test@gmail.com', "testing email")
+        self.assertEqual(user.password_hash, 'password', "test password")
+        self.assertEqual(user.budget, 1100)
     
+    def test_prettier_budget(self):
+        # test prettier budget method
+        budget = User(username='qwerty', email_address='test@gmail.com', password_hash='password', budget=1100).prettier_budget
+        self.assertEqual(budget, "1,100$")
+        
+    def test_password(self):
+        # test password getter method
+        passw = User(username='qwerty', email_address='test@gmail.com', password_hash='password', budget=1100).password
+        print(passw)
+        
+    
+    def test_password_setter(self):
+        password = 'qwerty'
+        pw_hash = bcrypt.generate_password_hash(password)
+        self.assertTrue(pw_hash)
+    
+    
+    def test_password_verification(self):
+        # u = User(password='password')
+        # self.assertTrue(u.check_password_correction('password'))
+        password = 'qwerty'
+        pw_hash = bcrypt.generate_password_hash(password)
+        ps_hash = bcrypt.check_password_hash(pw_hash, 'qwerty')
+        self.assertTrue(ps_hash)
+        
+    def test_can_purchase(self):
+        user = User(username='qwert', email_address='test@gmail.com', password_hash='passwords', budget=2000).can_purchase(Item(
+          name='paper', price=1000, barcode='white', description='test'  
+        ))
+        self.assertTrue(user)    
+    
+   
+        
     def test_item(self):
-        item = Item(name='PS5', price=250, barcode='258741369000', description='description')
+        item = Item(name='paper', price=15, barcode='white', description='test')
         
-        self.assertEqual(item.name, 'PS5', 'console')
-        self.assertEqual(item.price, 250, 'price')
-        self.assertEqual(item.barcode, '258741369000', 'barcode')
-        self.assertEqual(item.description, 'description', 'description')
+        self.assertEqual(item.name, 'paper', "this the name")
+        self.assertEqual(item.price, 15)
+        self.assertEqual(item.barcode, 'white')
+        self.assertEqual(item.description, 'test')
+
+    def test_repr(self):
+        item = Item(name='car', price=15, barcode='white', description='test')
         
+        self.assertEqual(item.__repr__(), "Item car")
