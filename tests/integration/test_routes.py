@@ -54,20 +54,25 @@ class TestForms(BaseTest):
         with self.app:
             with self.app_context():
                 # create user n login
-                response = self.app.post('/register', data=dict(username='test4', email_address='test3@test.com', password1='password', password2='password', budget = 2000), follow_redirects=True)
+                response = self.app.post('/register', data=dict(username='test4', email_address='test3@test.com', password1='password', password2='password'), follow_redirects=True)
                 self.assertEqual(current_user.get_id(), '1')
-    
+                user = db.session.query(User).filter_by(username='test4').first()
+                user.budget = 7000
+                db.session.commit()
+                # check if user budget is 7000
+                self.assertEqual(user.budget, 7000)
+                
                 # create item save to db
                 item = Item(name='RTX 3090', price=1200, barcode='8555632047963', description='description')
                 db.session.add(item)
                 db.session.commit()
                 result = db.session.query(Item).filter_by(name="RTX 3090").first()
-                self.assertIsNotNone(result)
+                self.assertTrue(result)
                 
                 # buy item in market
-                response = self.app.post('/market', follow_redirects=True)
+                response = self.app.post('/market',data=dict(purchased_item='RTX 3090') ,follow_redirects=True)
               
-                self.assertIn(b'Are you sure you want to buy RTX 3090 for 1200$ ?', response.data)
-                self.assertIn(b'By clicking Purchase, you will purchase this item.', response.data)
+                # self.assertIn(b'Are you sure you want to buy RTX 3090 for 1200$ ?', response.data)
+                # self.assertIn(b'By clicking Purchase, you will purchase this item.', response.data)
                 self.assertIn(b'Congratulations! You purchased RTX 3090 for 1200$', response.data)
                 
