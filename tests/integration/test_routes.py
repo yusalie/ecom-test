@@ -5,6 +5,8 @@ from flask_login import current_user
 from flask import request
 from market.routes import register_page
 from market.models import User, Item
+from market.forms import RegisterForm
+from wtforms.validators import ValidationError
 
 class TestForms(BaseTest):
 # testing register route post(sucessful register)
@@ -111,3 +113,29 @@ class TestForms(BaseTest):
                 response = self.app.get('/market',data=dict(sold_item='RTX 3090') ,follow_redirects=True)
               
                 self.assertIn(b'Congratulations! You sold RTX 3090 back to market!', response.data)
+                
+    def test_validate_username(self):
+        with self.app:
+            with self.app_context():
+                self.app.post('/register', data=dict(username='test6', email_address='test5@test.com', password1='password', password2='password'), follow_redirects=True)
+                
+                class test6():
+                    data='test6'
+                with self.assertRaises(ValidationError) as context:
+                    RegisterForm().validate_username(test6)
+                    self.assertEqual('Username already exists! Please try a different username', str(context.exception))
+
+    def test_validate_email(self):
+        with self.app:
+            with self.app_context():
+                self.app.post('/register', data=dict(username='test6', email_address='test5@test.com', password1='password', password2='password'), follow_redirects=True)
+                
+                class email():
+                    data='test6'
+                with self.assertRaises(ValidationError) as context:
+                    RegisterForm().validate_username(email)
+                    self.assertEqual('Email Address already exists! Please try a different email address', str(context.exception))
+
+    
+    
+                
