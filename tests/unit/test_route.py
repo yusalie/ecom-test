@@ -1,5 +1,6 @@
 from unittest import TestCase
 from market import app
+from flask import request
 
 class TestRoute(TestCase):
     def test_home(self):
@@ -27,3 +28,15 @@ class TestRoute(TestCase):
         with app.test_client() as client:
             response = client.get('/logout')
             self.assertEqual(response.status_code, 302)
+
+    def test_route(self):
+        with self.app:
+            response = self.app.get('/', follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+    
+    def test_login(self):
+        with self.app:
+            response = self.app.get('/login', follow_redirects=True)
+            self.assertIn('/login', request.url)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Please Login', response.data)

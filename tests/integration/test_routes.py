@@ -36,21 +36,27 @@ class TestForms(BaseTest):
     
     def logout(self):
         with self.app:
-            with self.app_context():
-                response = self.app.post('/register', data=dict(username='test3', email_address='test3@test.com', password1='password', password2='password'), follow_redirects=True)
-                user = db.session.query(User).filter_by(email_address='test3@test.com').first()
-                self.assertTrue(user)
-                self.assertIn(b'Account created successfully! You are now logged in as test3', response.data)
-                self.assertEqual(current_user.get_id(), '3')
-                
-                response = self.app.post('/login', data=dict(username='test3', email_address='test3@test.com', password='password'), follow_redirects=True)
-                self.assertTrue(user)
+            response = self.app.post('/register', data=dict(
+                username='steve', email_address='okays@gmail.com',
+                password1='python1', password2='python1'
+            ), follow_redirects=True)
             
-                response = self.app.get('/log-out', follow_redirects=True)
-                self.assertEqual(response.status_code, 200)
-        
-                self.assertIn('/log-in', request.url)
-                self.assertFalse(current_user.is_active)
+            response = self.app.post('/login', data=dict(
+                username='steve', password='python1'
+            ), follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Success! You are logged in as: steve', response.data)
+            user = db.session.query(User).filter_by(username='steve').first()
+            self.assertTrue(user)
+            #logs user out
+            response = self.app.get('/logout', follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'You have been logged out!', response.data)
+            
+            #redirects to logout page
+            self.assertIn('/home', request.url)
+            self.assertFalse(current_user.is_active)
+
     
     def test_market(self):
         with self.app:
@@ -135,7 +141,44 @@ class TestForms(BaseTest):
                 with self.assertRaises(ValidationError) as context:
                     RegisterForm().validate_username(email)
                     self.assertEqual('Email Address already exists! Please try a different email address', str(context.exception))
+    
+    def test_cannot_buy(self):
+         with self.app:
+            response = self.app.post('/register', data=dict(username='test5', email_address='test5@test.com', password1='password', password2='password'), follow_redirects=True)
+            self.assertEqual(current_user.get_id(), '1')
+            user = db.session.query(User).filter_by(username='test5').first()
+            user.budget = 1000
+            db.session.commit()
+            # check if user budget is 1000
+            self.assertEqual(user.budget, 1000)
+            
+            # create item save to db
+            item = Item(name='paper', price=1200, barcode='testing', description='white')
+            db.session.add(item)
+            db.session.commit()
+            result = db.session.query(Item).filter_by(name="paper").first()
+            self.assertTrue(result)
+            
+            # buy item in market
+            response = self.app.post('/market',data=dict(purchased_item='paper') ,follow_redirects=True)
+            
+            
+            self.assertIn(b"Unfortunately, you don&#39;t have enough money to purchase paper!", response.data)
 
-    
-    
-                
+    def test_cannot_sell(self):
+        with self.app:
+            self.app.post('/register', data=dict(username='test7', email_address='test7@test.com', password1='password', password2='password'), follow_redirects=True)
+            self.assertTrue(current_user.is_active)
+            self.assertIn('/market', request.url)
+            
+            self.assertTrue(current_user.get_id(), '1')
+            user = db.session.query(User).filter_by(username='test7').first()
+            self.assertEqual(user.username, 'test7')
+            
+            item = Item(id=1, name='paper', price=1200, barcode='testing', description='white')
+            db.session.add(item)
+            db.session.commit()
+            self.assertEqual(user.items, [])
+            response = self.app.post('/market', data=dict(sold_item='paper') ,follow_redirects=True)
+            self.assertIn(b"Something went wrong with selling paper", response.data)
+

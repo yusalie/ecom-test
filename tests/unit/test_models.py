@@ -1,7 +1,7 @@
 from unittest import TestCase
 from market.models import User, Item
 from market import bcrypt
-
+from 
 
 class TestModels(TestCase):
     # test user model creates user object
@@ -14,20 +14,12 @@ class TestModels(TestCase):
         self.assertEqual(user.budget, 1100)
     
     def test_prettier_budget(self):
-        # test prettier budget method
         budget = User(username='qwerty', email_address='test@gmail.com', password_hash='password', budget=1100).prettier_budget
         self.assertEqual(budget, "1,100$")
         
     def test_password(self):
-        # test password getter method
         passw = User(username='qwerty', email_address='test@gmail.com', password_hash='password', budget=1100).password
-        print(passw)
-        
-    def test_password_setter(self):
-        password = 'qwerty'
-        pw_hash = bcrypt.generate_password_hash(password)
-        self.assertTrue(pw_hash)
-    
+        self.assertEqual(passw, 'password')
     
     def test_password_verification(self):
         password = 'qwerty'
