@@ -42,4 +42,11 @@ class somethingModel(BaseTest):
             
             result = db.session.query(Item).filter_by(name="RTX 3080").first()
             self.assertIsNone(result)
-    
+            
+    def test_password_setter(self):
+        with self.app_context():
+            self.app.post('/register', data=dict(username='test', email_address='strive@gg.com', password1='password', password2='password'))
+            user = db.session.query(User).filter_by(username='test').first()
+            # assert user.password not equals 'password' 
+            self.assertNotEqual(user.password, 'password')
+            print(user.password)
